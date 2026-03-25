@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="theme-color" content="#3b82f6">
+  <meta name="description" content="محرر PDF متكامل - تحرير، دمج، تقسيم، تحويل ملفات PDF">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>محرر PDF</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ======= Loading Screen ======= -->
+  <div id="loading-screen">
+    <div class="loader-content">
+      <div class="loader-icon">
+        <i class="fas fa-file-pdf"></i>
+      </div>
+      <h1>محرر PDF</h1>
+      <div class="loader-bar"><div class="loader-fill"></div></div>
+      <p>جاري تحميل التطبيق...</p>
+    </div>
+  </div>
+
+  <!-- ======= Upload Screen ======= -->
+  <div id="upload-screen" class="screen hidden">
+    <nav class="upload-nav">
+      <div class="brand">
+        <i class="fas fa-file-pdf"></i>
+        <span>محرر PDF</span>
+      </div>
+      <div class="nav-actions">
+        <button id="btn-install-pwa" class="btn-nav hidden" title="تثبيت التطبيق">
+          <i class="fas fa-download"></i>
+          <span>تثبيت</span>
+        </button>
+      </div>
+    </nav>
+
+    <main class="upload-main">
+      <div class="upload-hero">
+        <h1>حرّر ملفات PDF بسهولة</h1>
+        <p>أضف نصوصاً، صوراً، توقيعات، وأشكالاً. ادمج، قسّم، وصدّر ملفاتك بكل سهولة.</p>
+      </div>
+
+      <div id="drop-zone" class="drop-zone">
+        <div class="drop-zone-content">
+          <div class="drop-icon">
+            <i class="fas fa-cloud-upload-alt"></i>
+          </div>
+          <h2>اسحب ملف PDF هنا</h2>
+          <p>أو اضغط لاختيار ملف</p>
+          <span class="drop-hint">الحد الأقصى: 50 ميجابايت</span>
+          <input type="file" id="file-input" accept=".pdf" hidden>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <button class="quick-action-card" id="btn-merge-files">
+          <div class="qa-icon"><i class="fas fa-object-group"></i></div>
+          <h3>دمج ملفات</h3>
+          <p>دمج عدة ملفات PDF في ملف واحد</p>
+        </button>
+        <button class="quick-action-card" id="btn-convert-action">
+          <div class="qa-icon"><i class="fas fa-exchange-alt"></i></div>
+          <h3>تحويل</h3>
+          <p>تحويل PDF إلى Word أو Excel</p>
+        </button>
+        <button class="quick-action-card" id="btn-ocr-action">
+          <div class="qa-icon"><i class="fas fa-eye"></i></div>
+          <h3>OCR</h3>
+          <p>التعرف الضوئي على النصوص</p>
+        </button>
+      </div>
+
+      <!-- Recent Projects -->
+      <div id="recent-projects" class="recent-projects hidden">
+        <h3><i class="fas fa-clock"></i> المشاريع الأخيرة</h3>
+        <div id="recent-list" class="recent-list"></div>
+      </div>
+    </main>
+
+    <footer class="upload-footer">
+      <p>جميع الملفات تُعالج محلياً في متصفحك - لا يتم رفع أي بيانات</p>
+    </footer>
+  </div>
+
+  <!-- ======= Editor Screen ======= -->
+  <div id="editor-screen" class="screen hidden">
+    <!-- Top Toolbar -->
+    <header id="toolbar">
+      <div class="toolbar-section toolbar-start">
+        <button id="btn-back" class="toolbar-btn" title="العودة">
+          <i class="fas fa-arrow-right"></i>
+        </button>
+        <span id="file-name" class="file-name">document.pdf</span>
+        <span id="save-status" class="save-status">
+          <i class="fas fa-check-circle"></i>
+        </span>
+      </div>
+
+      <div class="toolbar-section toolbar-tools">
+        <!-- Tool Groups -->
+        <div class="tool-group" data-group="basic">
+          <button class="tool-btn active" data-tool="select" title="تحديد (V)">
+            <i class="fas fa-mouse-pointer"></i>
+            <span class="tool-label">تحديد</span>
+          </button>
+          <button class="tool-btn" data-tool="hand" title="يد (H)">
+            <i class="fas fa-hand-paper"></i>
+            <span class="tool-label">يد</span>
+          </button>
+        </div>
+
+        <div class="tool-divider"></div>
+
+        <div class="tool-group" data-group="add">
+          <button class="tool-btn" data-tool="text" title="إضافة نص (T)">
+            <i class="fas fa-font"></i>
+            <span class="tool-label">نص</span>
+          </button>
+          <button class="tool-btn" data-tool="image" title="إضافة صورة (I)">
+            <i class="fas fa-image"></i>
+            <span class="tool-label">صورة</span>
+          </button>
+          <button class="tool-btn" data-tool="signature" title="توقيع (S)">
+            <i class="fas fa-signature"></i>
+            <span class="tool-label">توقيع</span>
+          </button>
+        </div>
+
+        <div class="tool-divider"></div>
+
+        <div class="tool-group" data-group="shapes">
+          <button class="tool-btn" data-tool="rect" title="مستطيل">
+            <i class="far fa-square"></i>
+            <span class="tool-label">مربع</span>
+          </button>
+          <button class="tool-btn" data-tool="circle" title="دائرة">
+            <i class="far fa-circle"></i>
+            <span class="tool-label">دائرة</span>
+          </button>
+          <button class="tool-btn" data-tool="line" title="خط">
+            <i class="fas fa-minus"></i>
+            <span class="tool-label">خط</span>
+          </button>
+          <button class="tool-btn" data-tool="arrow" title="سهم">
+            <i class="fas fa-long-arrow-alt-left"></i>
+            <span class="tool-label">سهم</span>
+          </button>
+        </div>
+
+        <div class="tool-divider"></div>
+
+        <div class="tool-group" data-group="annotate">
+          <button class="tool-btn" data-tool="highlight" title="تظليل">
+            <i class="fas fa-highlighter"></i>
+            <span class="tool-label">تظليل</span>
+          </button>
+          <button class="tool-btn" data-tool="draw" title="رسم حر">
+            <i class="fas fa-pen"></i>
+            <span class="tool-label">رسم</span>
+          </button>
+          <button class="tool-btn" data-tool="eraser" title="ممحاة (E)">
+            <i class="fas fa-eraser"></i>
+            <span class="tool-label">ممحاة</span>
+          </button>
+          <button class="tool-btn" data-tool="note" title="ملاحظة لاصقة">
+            <i class="fas fa-sticky-note"></i>
+            <span class="tool-label">ملاحظة</span>
+          </button>
+          <button class="tool-btn" data-tool="link" title="رابط (L)">
+            <i class="fas fa-link"></i>
+            <span class="tool-label">رابط</span>
+          </button>
+        </div>
+
+        <div class="tool-divider"></div>
+
+        <div class="tool-group" data-group="forms">
+          <button class="tool-btn has-dropdown" data-tool="form-menu" title="نماذج">
+            <i class="fas fa-wpforms"></i>
+            <span class="tool-label">نماذج</span>
+          </button>
+          <div class="tool-dropdown hidden" id="forms-dropdown">
+            <button data-form="text-field"><i class="fas fa-i-cursor"></i> حقل نصي</button>
+            <button data-form="checkbox"><i class="far fa-check-square"></i> خانة اختيار</button>
+            <button data-form="radio"><i class="far fa-dot-circle"></i> نقطة اختيار</button>
+            <button data-form="dropdown"><i class="fas fa-caret-square-down"></i> قائمة منسدلة</button>
+            <button data-form="listbox"><i class="fas fa-list"></i> مربع القائمة</button>
+            <button data-form="button"><i class="fas fa-square"></i> زر</button>
+          </div>
+        </div>
+
+        <div class="tool-divider desktop-only"></div>
+
+        <div class="tool-group desktop-only" data-group="actions">
+          <button class="tool-btn" id="btn-ocr-tool" title="OCR">
+            <i class="fas fa-eye"></i>
+            <span class="tool-label">OCR</span>
+          </button>
+          <button class="tool-btn" id="btn-convert-tool" title="تحويل">
+            <i class="fas fa-exchange-alt"></i>
+            <span class="tool-label">تحويل</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar-section toolbar-end">
+        <button id="btn-undo" class="toolbar-btn" title="تراجع (Ctrl+Z)" disabled>
+          <i class="fas fa-undo"></i>
+        </button>
+        <button id="btn-redo" class="toolbar-btn" title="إعادة (Ctrl+Y)" disabled>
+          <i class="fas fa-redo"></i>
+        </button>
+        <div class="tool-divider"></div>
+        <button id="btn-save" class="toolbar-btn" title="حفظ (Ctrl+S)">
+          <i class="fas fa-save"></i>
+        </button>
+        <button id="btn-export" class="toolbar-btn btn-primary" title="تصدير">
+          <i class="fas fa-download"></i>
+          <span class="btn-text">تصدير</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Properties Panel -->
+    <div id="properties-panel" class="properties-panel hidden">
+      <div class="props-section">
+        <label>الخط</label>
+        <select id="prop-font">
+          <option value="Tajawal">Tajawal</option>
+          <option value="Arial">Arial</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Courier New">Courier New</option>
+          <option value="Georgia">Georgia</option>
+        </select>
+      </div>
+      <div class="props-section">
+        <label>الحجم</label>
+        <input type="number" id="prop-size" value="16" min="6" max="200">
+      </div>
+      <div class="props-section">
+        <label>اللون</label>
+        <input type="color" id="prop-color" value="#000000">
+      </div>
+      <div class="props-section">
+        <label>لون التعبئة</label>
+        <input type="color" id="prop-fill" value="#ffffff">
+        <label class="checkbox-label">
+          <input type="checkbox" id="prop-fill-enabled"> تفعيل
+        </label>
+      </div>
+      <div class="props-section">
+        <label>الشفافية</label>
+        <input type="range" id="prop-opacity" min="0" max="1" step="0.1" value="1">
+      </div>
+      <div class="props-section">
+        <label>سمك الحد</label>
+        <input type="number" id="prop-stroke-width" value="2" min="0" max="20">
+      </div>
+      <div class="props-section text-props">
+        <button id="prop-bold" class="prop-btn" title="غامق"><i class="fas fa-bold"></i></button>
+        <button id="prop-italic" class="prop-btn" title="مائل"><i class="fas fa-italic"></i></button>
+        <button id="prop-underline" class="prop-btn" title="تحته خط"><i class="fas fa-underline"></i></button>
+      </div>
+      <div class="props-section">
+        <button id="prop-delete" class="prop-btn danger" title="حذف"><i class="fas fa-trash"></i> حذف</button>
+        <button id="prop-duplicate" class="prop-btn" title="نسخ"><i class="fas fa-copy"></i> نسخ</button>
+      </div>
+    </div>
+
+    <!-- Editor Body -->
+    <div class="editor-body">
+      <!-- Pages Sidebar -->
+      <aside id="pages-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-layer-group"></i> الصفحات</h3>
+          <button id="btn-toggle-pages" class="panel-toggle">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+        <div id="thumbnails-container" class="thumbnails"></div>
+        <div class="page-panel-actions">
+          <button id="btn-add-blank" title="إضافة صفحة فارغة"><i class="fas fa-plus"></i></button>
+          <button id="btn-delete-page" title="حذف الصفحة"><i class="fas fa-trash"></i></button>
+          <button id="btn-rotate-page" title="تدوير الصفحة"><i class="fas fa-sync-alt"></i></button>
+          <button id="btn-merge-tool" title="دمج ملفات"><i class="fas fa-object-group"></i></button>
+          <button id="btn-split-tool" title="تقسيم"><i class="fas fa-cut"></i></button>
+        </div>
+      </aside>
+
+      <!-- Canvas Area -->
+      <main id="canvas-area">
+        <div id="canvas-wrapper">
+          <canvas id="fabric-canvas"></canvas>
+        </div>
+      </main>
+    </div>
+
+    <!-- Bottom Bar -->
+    <footer id="bottom-bar">
+      <div class="bottom-section">
+        <button id="btn-toggle-sidebar" class="bottom-btn" title="إظهار/إخفاء الصفحات">
+          <i class="fas fa-columns"></i>
+        </button>
+      </div>
+      <div class="bottom-section page-navigation">
+        <button id="btn-prev-page" class="bottom-btn" title="الصفحة السابقة">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        <div class="page-indicator">
+          <input type="number" id="current-page-input" value="1" min="1">
+          <span>/</span>
+          <span id="total-pages">0</span>
+        </div>
+        <button id="btn-next-page" class="bottom-btn" title="الصفحة التالية">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+      </div>
+      <div class="bottom-section zoom-controls">
+        <button id="btn-zoom-out" class="bottom-btn" title="تصغير">
+          <i class="fas fa-search-minus"></i>
+        </button>
+        <span id="zoom-level">100%</span>
+        <button id="btn-zoom-in" class="bottom-btn" title="تكبير">
+          <i class="fas fa-search-plus"></i>
+        </button>
+        <button id="btn-fit-page" class="bottom-btn" title="ملائمة">
+          <i class="fas fa-expand"></i>
+        </button>
+      </div>
+    </footer>
+
+    <!-- Mobile Floating Toolbar -->
+    <div id="mobile-fab" class="mobile-fab">
+      <button id="fab-toggle" class="fab-main">
+        <i class="fas fa-plus"></i>
+      </button>
+      <div class="fab-menu hidden">
+        <button class="fab-item" data-tool="text"><i class="fas fa-font"></i></button>
+        <button class="fab-item" data-tool="image"><i class="fas fa-image"></i></button>
+        <button class="fab-item" data-tool="signature"><i class="fas fa-signature"></i></button>
+        <button class="fab-item" data-tool="draw"><i class="fas fa-pen"></i></button>
+        <button class="fab-item" data-tool="eraser"><i class="fas fa-eraser"></i></button>
+        <button class="fab-item" data-tool="link"><i class="fas fa-link"></i></button>
+        <button class="fab-item" data-tool="note"><i class="fas fa-sticky-note"></i></button>
+        <button class="fab-item" data-tool="highlight"><i class="fas fa-highlighter"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= Modals ======= -->
+
+  <!-- Signature Modal -->
+  <div id="signature-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-signature"></i> التوقيع</h3>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="signature-tabs">
+          <button class="sig-tab active" data-tab="draw">رسم</button>
+          <button class="sig-tab" data-tab="upload">رفع صورة</button>
+          <button class="sig-tab" data-tab="type">كتابة</button>
+        </div>
+        <div class="sig-content" id="sig-draw-tab">
+          <canvas id="signature-pad" width="500" height="200"></canvas>
+          <div class="sig-colors">
+            <button class="sig-color active" data-color="#000000" style="background:#000000"></button>
+            <button class="sig-color" data-color="#1e40af" style="background:#1e40af"></button>
+            <button class="sig-color" data-color="#dc2626" style="background:#dc2626"></button>
+          </div>
+        </div>
+        <div class="sig-content hidden" id="sig-upload-tab">
+          <div class="sig-upload-zone">
+            <i class="fas fa-image"></i>
+            <p>اضغط لرفع صورة التوقيع</p>
+            <input type="file" id="sig-file-input" accept="image/*" hidden>
+          </div>
+          <img id="sig-preview" class="sig-preview hidden" alt="preview">
+        </div>
+        <div class="sig-content hidden" id="sig-type-tab">
+          <input type="text" id="sig-text-input" placeholder="اكتب توقيعك هنا..." class="sig-text-input">
+          <select id="sig-font-select" class="sig-font-select">
+            <option value="'Dancing Script', cursive">Dancing Script</option>
+            <option value="'Great Vibes', cursive">Great Vibes</option>
+            <option value="Tajawal">Tajawal</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="sig-clear" class="btn btn-secondary">مسح</button>
+        <button id="sig-apply" class="btn btn-primary">إضافة التوقيع</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Merge Modal -->
+  <div id="merge-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3><i class="fas fa-object-group"></i> دمج ملفات PDF</h3>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="merge-upload-zone" id="merge-drop-zone">
+          <i class="fas fa-plus-circle"></i>
+          <p>اسحب ملفات PDF هنا أو اضغط للاختيار</p>
+          <input type="file" id="merge-file-input" accept=".pdf" multiple hidden>
+        </div>
+        <div id="merge-file-list" class="merge-file-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close-btn">إلغاء</button>
+        <button id="btn-merge-execute" class="btn btn-primary" disabled>دمج الملفات</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Split Modal -->
+  <div id="split-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-cut"></i> تقسيم / استخراج صفحات</h3>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="split-option">
+          <label>اختر الصفحات للاستخراج:</label>
+          <input type="text" id="split-pages-input" placeholder="مثال: 1,3,5-8" class="input-field">
+          <small>استخدم الفاصلة للصفحات المنفردة والشرطة للنطاقات</small>
+        </div>
+        <div class="split-thumbnails" id="split-thumbnails"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close-btn">إلغاء</button>
+        <button id="btn-split-execute" class="btn btn-primary">استخراج</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div id="export-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-download"></i> تصدير الملف</h3>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="export-options">
+          <button class="export-option" data-format="pdf">
+            <i class="fas fa-file-pdf"></i>
+            <span>PDF</span>
+            <small>تصدير كملف PDF</small>
+          </button>
+          <button class="export-option" data-format="images">
+            <i class="fas fa-images"></i>
+            <span>صور PNG</span>
+            <small>تصدير كل صفحة كصورة</small>
+          </button>
+          <button class="export-option" data-format="word">
+            <i class="fas fa-file-word"></i>
+            <span>Word</span>
+            <small>تحويل النص إلى Word</small>
+          </button>
+          <button class="export-option" data-format="excel">
+            <i class="fas fa-file-excel"></i>
+            <span>Excel</span>
+            <small>استخراج الجداول</small>
+          </button>
+        </div>
+        <div id="export-quality" class="export-quality">
+          <label>جودة التصدير:</label>
+          <select id="export-quality-select">
+            <option value="1">عادية (أسرع)</option>
+            <option value="1.5" selected>جيدة</option>
+            <option value="2">عالية</option>
+            <option value="3">ممتازة (أبطأ)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close-btn">إلغاء</button>
+        <button id="btn-export-execute" class="btn btn-primary">تصدير</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OCR Modal -->
+  <div id="ocr-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-eye"></i> التعرف الضوئي (OCR)</h3>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="ocr-options">
+          <label>اللغة:</label>
+          <select id="ocr-language">
+            <option value="ara">العربية</option>
+            <option value="eng">الإنجليزية</option>
+            <option value="ara+eng">العربية + الإنجليزية</option>
+          </select>
+        </div>
+        <div class="ocr-scope">
+          <label>النطاق:</label>
+          <label class="radio-label">
+            <input type="radio" name="ocr-scope" value="current" checked> الصفحة الحالية
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="ocr-scope" value="all"> جميع الصفحات
+          </label>
+        </div>
+        <div id="ocr-progress" class="ocr-progress hidden">
+          <div class="progress-bar"><div class="progress-fill" id="ocr-progress-fill"></div></div>
+          <span id="ocr-progress-text">جاري التعرف...</span>
+        </div>
+        <div id="ocr-result" class="ocr-result hidden">
+          <textarea id="ocr-text" class="ocr-text" readonly></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close-btn">إغلاق</button>
+        <button id="btn-ocr-copy" class="btn btn-secondary hidden"><i class="fas fa-copy"></i> نسخ</button>
+        <button id="btn-ocr-execute" class="btn btn-primary">بدء التعرف</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Note Input Modal -->
+  <div id="note-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h3><i class="fas fa-sticky-note"></i> ملاحظة لاصقة</h3>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <textarea id="note-text" class="note-text-input" placeholder="اكتب ملاحظتك هنا..." rows="4"></textarea>
+        <div class="note-colors">
+          <button class="note-color active" data-color="#fef08a" style="background:#fef08a"></button>
+          <button class="note-color" data-color="#bbf7d0" style="background:#bbf7d0"></button>
+          <button class="note-color" data-color="#bfdbfe" style="background:#bfdbfe"></button>
+          <button class="note-color" data-color="#fecaca" style="background:#fecaca"></button>
+          <button class="note-color" data-color="#e9d5ff" style="background:#e9d5ff"></button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close-btn">إلغاء</button>
+        <button id="btn-note-add" class="btn btn-primary">إضافة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link Modal -->
+  <div id="link-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h3><i class="fas fa-link"></i> إضافة رابط</h3>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>نص الرابط</label>
+          <input type="text" id="link-text" class="input-field" placeholder="اضغط هنا" value="اضغط هنا">
+        </div>
+        <div class="form-group">
+          <label>عنوان URL</label>
+          <input type="url" id="link-url" class="input-field" placeholder="https://example.com" dir="ltr">
+        </div>
+        <div class="form-group">
+          <label>اللون</label>
+          <input type="color" id="link-color" value="#1d4ed8">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close-btn">إلغاء</button>
+        <button id="btn-link-add" class="btn btn-primary">إضافة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Element Modal -->
+  <div id="form-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h3><i class="fas fa-wpforms"></i> إعدادات العنصر</h3>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>النص / التسمية</label>
+          <input type="text" id="form-label" class="input-field" placeholder="تسمية العنصر">
+        </div>
+        <div class="form-group" id="form-options-group" style="display:none">
+          <label>الخيارات (سطر لكل خيار)</label>
+          <textarea id="form-options" class="input-field" rows="4" placeholder="خيار 1&#10;خيار 2&#10;خيار 3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>العرض</label>
+          <input type="number" id="form-width" class="input-field" value="200" min="50" max="600">
+        </div>
+        <div class="form-group">
+          <label>الارتفاع</label>
+          <input type="number" id="form-height" class="input-field" value="36" min="20" max="400">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close-btn">إلغاء</button>
+        <button id="btn-form-add" class="btn btn-primary">إضافة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Progress Overlay -->
+  <div id="progress-overlay" class="hidden">
+    <div class="progress-overlay-content">
+      <div class="progress-spinner"></div>
+      <div class="progress-bar"><div class="progress-fill" id="global-progress-fill"></div></div>
+      <span id="global-progress-text">جاري المعالجة...</span>
+    </div>
+  </div>
+
+  <!-- Context Menu -->
+  <div id="context-menu" class="context-menu hidden">
+    <button data-action="duplicate"><i class="fas fa-copy"></i> نسخ</button>
+    <button data-action="delete"><i class="fas fa-trash"></i> حذف</button>
+    <button data-action="bring-front"><i class="fas fa-arrow-up"></i> إلى الأمام</button>
+    <button data-action="send-back"><i class="fas fa-arrow-down"></i> إلى الخلف</button>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/history.js"></script>
+  <script src="js/pdf-engine.js"></script>
+  <script src="js/canvas-editor.js"></script>
+  <script src="js/export-handler.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

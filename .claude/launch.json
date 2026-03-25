@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pdf-editor",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["http-server", "C:\\xampp\\htdocs\\s\\pdf", "-p", "8091", "-c-1"],
+      "port": 8091,
+      "urlPath": "/index.html"
+    }
+  ]
+}

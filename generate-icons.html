@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html><head><title>Generate PWA Icons</title>
+<style>body{font-family:sans-serif;padding:20px;background:#1e293b;color:#fff}a{color:#93bbfd;display:block;margin:6px 0}h1{color:#3b82f6}.done{color:#22c55e;font-weight:bold;margin-top:20px}</style>
+</head><body>
+<h1>PDF Editor - Icon Generator</h1>
+<p>Click each link to download, or press "Download All"</p>
+<button id="downloadAll" style="padding:10px 24px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;margin:12px 0">Download All Icons</button>
+<div id="links"></div>
+<div id="status"></div>
+<script>
+function createIcon(size) {
+  const c = document.createElement('canvas');
+  c.width = size; c.height = size;
+  const ctx = c.getContext('2d');
+
+  // Background
+  const grad = ctx.createLinearGradient(0, 0, size, size);
+  grad.addColorStop(0, '#3b82f6');
+  grad.addColorStop(1, '#1d4ed8');
+  ctx.fillStyle = grad;
+  roundRect(ctx, 0, 0, size, size, size * 0.18);
+  ctx.fill();
+
+  // Document shape
+  const m = size * 0.22;
+  const dw = size * 0.56;
+  const dh = size * 0.62;
+  const dx = (size - dw) / 2;
+  const dy = size * 0.12;
+  const fold = dw * 0.28;
+
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.moveTo(dx, dy);
+  ctx.lineTo(dx + dw - fold, dy);
+  ctx.lineTo(dx + dw, dy + fold);
+  ctx.lineTo(dx + dw, dy + dh);
+  ctx.lineTo(dx, dy + dh);
+  ctx.closePath();
+  ctx.fill();
+
+  // Fold
+  ctx.fillStyle = '#dbeafe';
+  ctx.beginPath();
+  ctx.moveTo(dx + dw - fold, dy);
+  ctx.lineTo(dx + dw, dy + fold);
+  ctx.lineTo(dx + dw - fold, dy + fold);
+  ctx.closePath();
+  ctx.fill();
+
+  // Lines
+  ctx.fillStyle = '#cbd5e1';
+  const lh = Math.max(2, size * 0.025);
+  for (let i = 0; i < 3; i++) {
+    const ly = dy + dh * 0.32 + i * (lh + size * 0.06);
+    const lw = (i === 2 ? dw * 0.4 : dw * 0.65);
+    roundRect(ctx, dx + dw * 0.12, ly, lw, lh, lh/2);
+    ctx.fill();
+  }
+
+  // PDF badge
+  const bh = size * 0.17;
+  const bw = size * 0.4;
+  const bx = (size - bw) / 2;
+  const by = dy + dh - bh * 0.4;
+  ctx.fillStyle = '#dc2626';
+  roundRect(ctx, bx, by, bw, bh, size * 0.03);
+  ctx.fill();
+
+  // PDF text
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `bold ${size * 0.09}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('PDF', size / 2, by + bh / 2);
+
+  return c.toDataURL('image/png');
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+const container = document.getElementById('links');
+const icons = [];
+
+sizes.forEach(size => {
+  const dataUrl = createIcon(size);
+  icons.push({ size, dataUrl });
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = `icon-${size}.png`;
+  a.textContent = `icon-${size}.png (${size}x${size})`;
+  container.appendChild(a);
+});
+
+document.getElementById('downloadAll').addEventListener('click', () => {
+  icons.forEach(({ size, dataUrl }, i) => {
+    setTimeout(() => {
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `icon-${size}.png`;
+      a.click();
+    }, i * 300);
+  });
+  document.getElementById('status').innerHTML = '<p class="done">✓ Downloading all icons...</p>';
+});
+</script>
+</body></html>
