@@ -5,9 +5,10 @@
   "main": "index.html",
   "scripts": {
     "start": "npx http-server . -p 8091 -o",
-    "cap:init": "npx cap init pdf-editor com.pdfeditor.app --web-dir .",
+    "build": "node -e \"const fs=require('fs');const p=require('path');function c(s,d){fs.mkdirSync(d,{recursive:true});fs.readdirSync(s).forEach(f=>{const sp=p.join(s,f),dp=p.join(d,f);if(fs.statSync(sp).isDirectory()){if(!['node_modules','android','ios','www','.git','.github','.claude'].includes(f))c(sp,dp)}else fs.copyFileSync(sp,dp)});} c('.','www');\"",
+    "cap:init": "npx cap init pdf-editor com.pdfeditor.app --web-dir www",
     "cap:add": "npx cap add android",
-    "cap:sync": "npx cap sync",
+    "cap:sync": "npm run build && npx cap sync",
     "cap:open": "npx cap open android",
     "cap:build": "cd android && ./gradlew assembleDebug",
     "cap:build-release": "cd android && ./gradlew assembleRelease"
